@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>文件詳情 · 行動版右側資訊提案 A–C</title>
+<style>
+  :root {
+    --bg: #f3f1ec;
+    --page: #f7f5f0;
+    --card: #ffffff;
+    --text: #1c1917;
+    --muted: #8a8478;
+    --line: #ebe6dc;
+    --teal: #0d9488;
+    --teal-d: #0f766e;
+    --teal-soft: #ccfbf1;
+    --teal-mid: #5eead4;
+    --draft: #f3f4f6;
+    --draft-t: #6b7280;
+    --warn: #fef3c7;
+    --warn-t: #b45309;
+    --ok: #d1fae5;
+    --ok-t: #047857;
+    --danger: #fee2e2;
+    --danger-t: #b91c1c;
+    --shadow: 0 1px 3px rgba(28,25,23,.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px 12px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page-head { max-width: 420px; margin: 0 auto 24px; }
+  .page-head h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .page-head .sub { color: var(--muted); font-size: 13px; line-height: 1.55; margin-top: 6px; }
+  .toc {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+  }
+  .toc a {
+    font-size: 12px; font-weight: 600; text-decoration: none;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--card); color: var(--teal-d);
+    border: 1px solid var(--line); box-shadow: var(--shadow);
+  }
+  .toc a:hover { background: var(--teal-soft); }
+
+  section.proposal { margin-bottom: 48px; }
+  .prop-label {
+    max-width: 390px; margin: 0 auto 10px;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .prop-label .tag {
+    font-size: 13px; font-weight: 700;
+    background: var(--teal); color: #fff;
+    padding: 4px 10px; border-radius: 8px;
+  }
+  .prop-label .name { font-size: 15px; font-weight: 700; }
+  .prop-desc {
+    max-width: 390px; margin: 0 auto 12px;
+    font-size: 12.5px; color: var(--muted); line-height: 1.55;
+  }
+
+  /* Phone frame */
+  .phone {
+    max-width: 390px; margin: 0 auto;
+    background: #1c1917;
+    border-radius: 28px;
+    padding: 12px;
+    box-shadow: 0 12px 40px rgba(28,25,23,.18);
+    position: relative;
+  }
+  .phone-notch {
+    width: 110px; height: 22px; background: #1c1917;
+    border-radius: 0 0 14px 14px;
+    margin: 0 auto -6px; position: relative; z-index: 2;
+  }
+  .screen {
+    background: var(--page);
+    border-radius: 18px;
+    overflow: hidden;
+    height: 720px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 16px 4px; font-size: 11px; font-weight: 600;
+    color: var(--text); flex-shrink: 0;
+  }
+  .status-bar .icons { display: flex; gap: 4px; align-items: center; opacity: .7; font-size: 10px; }
+
+  /* App chrome */
+  .app-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px 10px; flex-shrink: 0;
+    background: var(--page);
+  }
+  .back-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; background: var(--card); color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: var(--shadow);
+  }
+  .back-btn svg { width: 16px; height: 16px; }
+  .hdr-title { flex: 1; min-width: 0; }
+  .hdr-title .doc-type { font-size: 11px; color: var(--muted); }
+  .hdr-title .doc-name {
+    font-size: 14px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hdr-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted);
+  }
+  .icon-btn svg { width: 15px; height: 15px; }
+
+  .banner-draft {
+    margin: 0 12px 8px;
+    background: var(--warn);
+    color: var(--warn-t);
+    font-size: 12px; font-weight: 600;
+    padding: 8px 12px; border-radius: 10px;
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .banner-draft .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--warn-t); flex-shrink: 0;
+  }
+
+  .tabs-row {
+    display: flex; gap: 2px; padding: 0 8px;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto; flex-shrink: 0;
+    scrollbar-width: none;
+    background: var(--page);
+  }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 10px 12px 9px;
+    font-size: 13px; font-weight: 500;
+    color: var(--muted); border: none; background: none;
+    cursor: pointer; position: relative;
+    font-family: inherit; white-space: nowrap;
+  }
+  .tab.active { color: var(--teal-d); font-weight: 700; }
+  .tab.active::after {
+    content: ""; position: absolute;
+    left: 10px; right: 10px; bottom: 0;
+    height: 2.5px; border-radius: 2px 2px 0 0;
+    background: var(--teal);
+  }
+  .tab .badge-n {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    font-size: 10px; font-weight: 700;
+    background: var(--teal); color: #fff;
+    border-radius: 999px; margin-left: 3px;
+  }
+
+  .scroll {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 16px;
+  }
+
+  .workflow-bar {
+    margin: 10px 12px 0;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 10px 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+  }
+  .workflow-bar .lbl { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .wf-btns { display: flex; gap: 8px; }
+  .wf-btn {
+    flex: 1; padding: 9px 8px; border-radius: 10px;
+    border: none; font-size: 13px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+  }
+  .wf-btn.primary { background: var(--teal); color: #fff; }
+  .wf-btn.ghost { background: #f5f3ee; color: var(--text); }
+
+  .info-card {
+    margin: 10px 12px 0;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+  }
+  .info-card h3 {
+    font-size: 13px; font-weight: 700; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .row {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 6px 0; font-size: 13px;
+    border-bottom: 1px solid #f5f3ee;
+  }
+  .row:last-child { border-bottom: none; }
+  .row .k { color: var(--muted); flex-shrink: 0; }
+  .row .v { font-weight: 500; text-align: right; }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px;
+  }
+  .pill.draft { background: var(--draft); color: var(--draft-t); }
+  .pill.teal { background: var(--teal-soft); color: var(--teal-d); }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 20px; }
+  .timeline::before {
+    content: ""; position: absolute;
+    left: 5px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--line);
+  }
+  .tl-item { position: relative; padding-bottom: 14px; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-dot {
+    position: absolute; left: -20px; top: 4px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--card); border: 2.5px solid var(--teal);
+  }
+  .tl-dot.muted { border-color: #c4bfb4; }
+  .tl-meta { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .tl-body { font-size: 13px; line-height: 1.45; font-weight: 500; }
+  .tl-note {
+    font-size: 12px; color: var(--muted); margin-top: 4px;
+    background: #f7f5f0; padding: 6px 8px; border-radius: 8px;
+  }
+
+  /* Approval steps */
+  .appr-step {
+    display: flex; gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid #f5f3ee;
+  }
+  .appr-step:last-child { border-bottom: none; }
+  .appr-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #5eead4, #0d9488);
+    color: #fff; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .appr-avatar.pending { background: #e7e5e4; color: #78716c; }
+  .appr-avatar.done { background: linear-gradient(135deg, #86efac, #059669); }
+  .appr-body { flex: 1; min-width: 0; }
+  .appr-name { font-size: 13px; font-weight: 600; }
+  .appr-role { font-size: 11px; color: var(--muted); }
+  .appr-status {
+    font-size: 11px; font-weight: 600; margin-top: 3px;
+  }
+  .appr-status.done { color: var(--ok-t); }
+  .appr-status.wait { color: var(--warn-t); }
+  .appr-status.todo { color: var(--muted); }
+
+  /* ========== A: Bottom dual entry + sheets ========== */
+  .a-bottom-bar {
+    flex-shrink: 0;
+    display: flex; gap: 8px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -4px 16px rgba(28,25,23,.06);
+  }
+  .a-entry {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    background: #faf9f6;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .15s, border-color .15s, transform .1s;
+  }
+  .a-entry:active { transform: scale(.97); }
+  .a-entry:hover { border-color: var(--teal-mid); background: var(--teal-soft); }
+  .a-entry .ic { font-size: 18px; line-height: 1; }
+  .a-entry .tx { font-size: 12px; font-weight: 700; color: var(--text); }
+  .a-entry .sub { font-size: 10px; color: var(--muted); }
+  .a-entry .count {
+    position: absolute; top: 6px; right: 8px;
+    background: var(--teal); color: #fff;
+    font-size: 10px; font-weight: 700;
+    min-width: 16px; height: 16px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+  }
+  .a-entry { position: relative; }
+
+  .sheet-overlay {
+    position: absolute; inset: 0;
+    background: rgba(28,25,23,.45);
+    z-index: 20;
+    opacity: 0; pointer-events: none;
+    transition: opacity .28s ease;
+    border-radius: 18px;
+  }
+  .sheet-overlay.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    max-height: 78%;
+    background: var(--card);
+    border-radius: 20px 20px 0 0;
+    z-index: 21;
+    transform: translateY(105%);
+    transition: transform .34s cubic-bezier(.32,.72,0,1);
+    display: flex; flex-direction: column;
+    box-shadow: 0 -8px 32px rgba(28,25,23,.15);
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: #d6d3d1; margin: 10px auto 4px; flex-shrink: 0;
+  }
+  .sheet-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px 12px; border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .sheet-hdr h2 { font-size: 16px; font-weight: 700; }
+  .sheet-close {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: none; background: #f5f3ee; color: var(--muted);
+    cursor: pointer; font-size: 16px; line-height: 1;
+  }
+  .sheet-body {
+    flex: 1; overflow-y: auto; padding: 14px 16px 28px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ========== B: Extra tabs ========== */
+  .b-segment {
+    display: flex; gap: 4px;
+    margin: 10px 12px 0;
+    background: #ebe6dc;
+    padding: 3px; border-radius: 10px;
+  }
+  .b-seg-btn {
+    flex: 1; padding: 7px 6px; border: none;
+    border-radius: 8px; font-size: 12px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    background: transparent; color: var(--muted);
+    transition: background .15s, color .15s;
+  }
+  .b-seg-btn.active {
+    background: var(--card); color: var(--teal-d);
+    box-shadow: var(--shadow);
+  }
+  .b-panel { display: none; }
+  .b-panel.active { display: block; }
+
+  /* ========== C: Accordion cards ========== */
+  .acc {
+    margin: 10px 12px 0;
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .acc-hdr {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border: none; background: none;
+    cursor: pointer; font-family: inherit; text-align: left;
+  }
+  .acc-hdr:hover { background: #faf9f6; }
+  .acc-ic {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .acc-ic.follow { background: var(--teal-soft); }
+  .acc-ic.appr { background: #e0e7ff; }
+  .acc-meta { flex: 1; min-width: 0; }
+  .acc-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .acc-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .acc-count {
+    background: var(--teal); color: #fff;
+    font-size: 10px; font-weight: 700;
+    min-width: 18px; height: 18px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0 5px;
+  }
+  .acc-chev {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #f5f3ee; color: #78716c;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .28s cubic-bezier(.4,0,.2,1), background .2s;
+    flex-shrink: 0;
+  }
+  .acc-chev svg { width: 14px; height: 14px; }
+  .acc.open .acc-chev { transform: rotate(180deg); background: var(--teal-soft); color: var(--teal-d); }
+  .acc-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .32s cubic-bezier(.4,0,.2,1);
+  }
+  .acc.open .acc-body { grid-template-rows: 1fr; }
+  .acc-inner {
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .28s ease .04s, transform .28s ease .04s;
+  }
+  .acc.open .acc-inner { opacity: 1; transform: translateY(0); }
+  .acc-content { padding: 0 14px 12px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .acc-footer {
+    display: flex; justify-content: flex-end;
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+  .link-btn {
+    font-size: 12px; font-weight: 600; color: var(--teal-d);
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    padding: 4px 0;
+  }
+
+  /* Fullscreen overlay for C "查看全部" */
+  .fs-overlay {
+    position: absolute; inset: 0;
+    background: var(--page);
+    z-index: 30;
+    transform: translateX(100%);
+    transition: transform .32s cubic-bezier(.32,.72,0,1);
+    display: flex; flex-direction: column;
+    border-radius: 18px;
+  }
+  .fs-overlay.open { transform: translateX(0); }
+  .fs-hdr {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; border-bottom: 1px solid var(--line);
+    background: var(--page); flex-shrink: 0;
+  }
+  .fs-hdr h2 { font-size: 15px; font-weight: 700; flex: 1; }
+  .fs-body { flex: 1; overflow-y: auto; padding: 14px 16px 28px; }
+
+  .empty-hint {
+    text-align: center; padding: 24px 12px;
+    color: var(--muted); font-size: 13px;
+  }
+
+  .foot-note {
+    max-width: 390px; margin: 10px auto 0;
+    font-size: 11.5px; color: var(--muted); line-height: 1.5;
+    padding: 0 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>文件詳情 · 行動版右側資訊</h1>
+  <p class="sub">桌面有右側「跟進紀錄」「審批流程」，手機目前藏起來。以下三案讓行動端也能輕鬆進出這兩塊資訊。<br>範例：報價單 · 傑米室內設計 · SAL-QTN-2026-00296 · 草稿</p>
+  <div class="toc">
+    <a href="#prop-a">A · 底部雙入口</a>
+    <a href="#prop-b">B · 頂部次要 tab</a>
+    <a href="#prop-c">C · 概要內嵌卡片</a>
+  </div>
+</div>
+
+<!-- ==================== PROPOSAL A ==================== -->
+<section class="proposal" id="prop-a">
+  <div class="prop-label">
+    <span class="tag">A</span>
+    <span class="name">底部雙入口 + Bottom Sheet</span>
+  </div>
+  <p class="prop-desc">主內容下方固定兩顆大鈕「跟進紀錄」「審批流程」，點開各自 bottom sheet（滑入動畫）。不佔用 tab 空間，入口永遠可見。</p>
+
+  <div class="phone" id="phone-a">
+    <div class="phone-notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="icons">▌▌▌ ☁︎ 🔋</span>
+      </div>
+      <div class="app-header">
+        <button class="back-btn" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="hdr-title">
+          <div class="doc-type">報價單</div>
+          <div class="doc-name">傑米室內設計</div>
+        </div>
+        <div class="hdr-actions">
+          <button class="icon-btn" aria-label="更多"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+        </div>
+      </div>
+      <div class="banner-draft"><span class="dot"></span>文件審批 · 草稿 — 尚未送出審批</div>
+      <div class="tabs-row" data-demo="a">
+        <button class="tab active" data-tab="概要">概要</button>
+        <button class="tab" data-tab="報價明細">報價明細</button>
+        <button class="tab" data-tab="關聯">關聯</button>
+        <button class="tab" data-tab="附件">附件</button>
+        <button class="tab" data-tab="更多">更多</button>
+      </div>
+      <div class="scroll" id="a-scroll">
+        <div class="workflow-bar">
+          <div class="lbl">工作流動作</div>
+          <div class="wf-btns">
+            <button class="wf-btn primary">送出審批</button>
+            <button class="wf-btn ghost">編輯</button>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>基本資訊</h3>
+          <div class="row"><span class="k">單號</span><span class="v">SAL-QTN-2026-00296</span></div>
+          <div class="row"><span class="k">狀態</span><span class="v"><span class="pill draft">草稿</span></span></div>
+          <div class="row"><span class="k">客戶</span><span class="v">傑米室內設計</span></div>
+          <div class="row"><span class="k">金額</span><span class="v">NT$ 186,000</span></div>
+          <div class="row"><span class="k">業務負責人</span><span class="v">賴建宇</span></div>
+          <div class="row"><span class="k">建立日期</span><span class="v">2026-09-22</span></div>
+        </div>
+        <div class="info-card">
+          <h3>備註</h3>
+          <p style="font-size:13px;line-height:1.5;color:var(--muted)">含設計費與部分施工估價，待客戶確認材質後調整。</p>
+        </div>
+      </div>
+      <!-- Bottom dual entry -->
+      <div class="a-bottom-bar">
+        <button class="a-entry" id="a-open-follow" type="button">
+          <span class="ic">💬</span>
+          <span class="tx">跟進紀錄</span>
+          <span class="sub">最近 · 昨天下午</span>
+          <span class="count">3</span>
+        </button>
+        <button class="a-entry" id="a-open-appr" type="button">
+          <span class="ic">✅</span>
+          <span class="tx">審批流程</span>
+          <span class="sub">待送出</span>
+        </button>
+      </div>
+      <!-- Sheets -->
+      <div class="sheet-overlay" id="a-overlay"></div>
+      <div class="sheet" id="a-sheet-follow">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+          <h2>跟進紀錄</h2>
+          <button class="sheet-close" data-close="a" type="button">×</button>
+        </div>
+        <div class="sheet-body">
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-meta">昨天 15:42 · 賴建宇</div>
+              <div class="tl-body">電話聯繫客戶，確認玄關櫃材質改用系統板</div>
+              <div class="tl-note">客戶希望週五前回覆報價調整</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-meta">9/24 10:18 · 賴建宇</div>
+              <div class="tl-body">寄出初版報價 PDF</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot muted"></div>
+              <div class="tl-meta">9/22 14:05 · 系統</div>
+              <div class="tl-body">建立報價單 SAL-QTN-2026-00296</div>
+            </div>
+          </div>
+          <button class="wf-btn primary" style="width:100%;margin-top:16px;" type="button">＋ 新增跟進</button>
+        </div>
+      </div>
+      <div class="sheet" id="a-sheet-appr">
+        <div class="sheet-handle"></div>
+        <div class="sheet-hdr">
+          <h2>審批流程</h2>
+          <button class="sheet-close" data-close="a" type="button">×</button>
+        </div>
+        <div class="sheet-body">
+          <div class="appr-step">
+            <div class="appr-avatar">賴</div>
+            <div class="appr-body">
+              <div class="appr-name">賴建宇</div>
+              <div class="appr-role">業務 · 發起人</div>
+              <div class="appr-status wait">草稿 · 尚未送出</div>
+            </div>
+          </div>
+          <div class="appr-step">
+            <div class="appr-avatar pending">王</div>
+            <div class="appr-body">
+              <div class="appr-name">王經理</div>
+              <div class="appr-role">業務主管 · 第 1 關</div>
+              <div class="appr-status todo">等待中</div>
+            </div>
+          </div>
+          <div class="appr-step">
+            <div class="appr-avatar pending">財</div>
+            <div class="appr-body">
+              <div class="appr-name">財務審核</div>
+              <div class="appr-role">財務 · 第 2 關</div>
+              <div class="appr-status todo">等待中</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="foot-note">點兩顆底部按鈕可開 sheet；點遮罩或 × 關閉。</p>
+</section>
+
+<!-- ==================== PROPOSAL B ==================== -->
+<section class="proposal" id="prop-b">
+  <div class="prop-label">
+    <span class="tag">B</span>
+    <span class="name">頂部次要 Tab</span>
+  </div>
+  <p class="prop-desc">在既有 tabs 旁直接加「跟進」「審批」兩個 tab（不塞進「更多」）。切換後內容區整頁顯示對應資訊，與桌面右側區塊對等。</p>
+
+  <div class="phone" id="phone-b">
+    <div class="phone-notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="icons">▌▌▌ ☁︎ 🔋</span>
+      </div>
+      <div class="app-header">
+        <button class="back-btn" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="hdr-title">
+          <div class="doc-type">報價單</div>
+          <div class="doc-name">傑米室內設計</div>
+        </div>
+        <div class="hdr-actions">
+          <button class="icon-btn" aria-label="更多"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+        </div>
+      </div>
+      <div class="banner-draft"><span class="dot"></span>文件審批 · 草稿 — 尚未送出審批</div>
+      <div class="tabs-row" id="b-tabs">
+        <button class="tab active" data-b="概要">概要</button>
+        <button class="tab" data-b="報價明細">報價明細</button>
+        <button class="tab" data-b="跟進">跟進<span class="badge-n">3</span></button>
+        <button class="tab" data-b="審批">審批</button>
+        <button class="tab" data-b="關聯">關聯</button>
+        <button class="tab" data-b="更多">更多</button>
+      </div>
+      <div class="scroll" id="b-scroll">
+        <!-- 概要 -->
+        <div class="b-panel active" data-panel="概要">
+          <div class="workflow-bar">
+            <div class="lbl">工作流動作</div>
+            <div class="wf-btns">
+              <button class="wf-btn primary">送出審批</button>
+              <button class="wf-btn ghost">編輯</button>
+            </div>
+          </div>
+          <div class="info-card">
+            <h3>基本資訊</h3>
+            <div class="row"><span class="k">單號</span><span class="v">SAL-QTN-2026-00296</span></div>
+            <div class="row"><span class="k">狀態</span><span class="v"><span class="pill draft">草稿</span></span></div>
+            <div class="row"><span class="k">客戶</span><span class="v">傑米室內設計</span></div>
+            <div class="row"><span class="k">金額</span><span class="v">NT$ 186,000</span></div>
+            <div class="row"><span class="k">業務負責人</span><span class="v">賴建宇</span></div>
+          </div>
+        </div>
+        <!-- 報價明細 -->
+        <div class="b-panel" data-panel="報價明細">
+          <div class="info-card">
+            <h3>明細預覽</h3>
+            <div class="row"><span class="k">設計規劃費</span><span class="v">NT$ 45,000</span></div>
+            <div class="row"><span class="k">玄關系統櫃</span><span class="v">NT$ 68,000</span></div>
+            <div class="row"><span class="k">客廳電視牆</span><span class="v">NT$ 73,000</span></div>
+            <div class="row"><span class="k">合計</span><span class="v" style="font-weight:700">NT$ 186,000</span></div>
+          </div>
+        </div>
+        <!-- 跟進 -->
+        <div class="b-panel" data-panel="跟進">
+          <div class="info-card">
+            <h3>跟進紀錄 <span class="pill teal">3 筆</span></h3>
+            <div class="timeline" style="margin-top:8px">
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-meta">昨天 15:42 · 賴建宇</div>
+                <div class="tl-body">電話聯繫客戶，確認玄關櫃材質改用系統板</div>
+                <div class="tl-note">客戶希望週五前回覆報價調整</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="tl-meta">9/24 10:18 · 賴建宇</div>
+                <div class="tl-body">寄出初版報價 PDF</div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot muted"></div>
+                <div class="tl-meta">9/22 14:05 · 系統</div>
+                <div class="tl-body">建立報價單 SAL-QTN-2026-00296</div>
+              </div>
+            </div>
+            <button class="wf-btn primary" style="width:100%;margin-top:14px;" type="button">＋ 新增跟進</button>
+          </div>
+        </div>
+        <!-- 審批 -->
+        <div class="b-panel" data-panel="審批">
+          <div class="info-card">
+            <h3>審批流程</h3>
+            <div class="appr-step">
+              <div class="appr-avatar">賴</div>
+              <div class="appr-body">
+                <div class="appr-name">賴建宇</div>
+                <div class="appr-role">業務 · 發起人</div>
+                <div class="appr-status wait">草稿 · 尚未送出</div>
+              </div>
+            </div>
+            <div class="appr-step">
+              <div class="appr-avatar pending">王</div>
+              <div class="appr-body">
+                <div class="appr-name">王經理</div>
+                <div class="appr-role">業務主管 · 第 1 關</div>
+                <div class="appr-status todo">等待中</div>
+              </div>
+            </div>
+            <div class="appr-step">
+              <div class="appr-avatar pending">財</div>
+              <div class="appr-body">
+                <div class="appr-name">財務審核</div>
+                <div class="appr-role">財務 · 第 2 關</div>
+                <div class="appr-status todo">等待中</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 關聯 / 更多 -->
+        <div class="b-panel" data-panel="關聯">
+          <div class="empty-hint">尚無關聯文件</div>
+        </div>
+        <div class="b-panel" data-panel="更多">
+          <div class="info-card">
+            <h3>更多</h3>
+            <div class="row"><span class="k">權限</span><span class="v">僅內部可見</span></div>
+            <div class="row"><span class="k">版本</span><span class="v">v1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="foot-note">點「跟進」「審批」tab 切換內容；與桌面右側對等，不藏在「更多」裡。</p>
+</section>
+
+<!-- ==================== PROPOSAL C ==================== -->
+<section class="proposal" id="prop-c">
+  <div class="prop-label">
+    <span class="tag">C</span>
+    <span class="name">概要內嵌可展開卡片</span>
+  </div>
+  <p class="prop-desc">在文件審批橫幅下方、概要內容上方各放「跟進紀錄 (N)」「審批流程」accordion 卡片；點開展開時間軸，也可「查看全部」進全屏。</p>
+
+  <div class="phone" id="phone-c">
+    <div class="phone-notch"></div>
+    <div class="screen">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="icons">▌▌▌ ☁︎ 🔋</span>
+      </div>
+      <div class="app-header">
+        <button class="back-btn" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="hdr-title">
+          <div class="doc-type">報價單</div>
+          <div class="doc-name">傑米室內設計</div>
+        </div>
+        <div class="hdr-actions">
+          <button class="icon-btn" aria-label="更多"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button>
+        </div>
+      </div>
+      <div class="banner-draft"><span class="dot"></span>文件審批 · 草稿 — 尚未送出審批</div>
+      <div class="tabs-row">
+        <button class="tab active">概要</button>
+        <button class="tab">報價明細</button>
+        <button class="tab">關聯</button>
+        <button class="tab">附件</button>
+        <button class="tab">更多</button>
+      </div>
+      <div class="scroll" id="c-scroll">
+        <!-- Accordion: 跟進 -->
+        <div class="acc" id="acc-follow">
+          <button class="acc-hdr" type="button" data-acc="acc-follow">
+            <div class="acc-ic follow">💬</div>
+            <div class="acc-meta">
+              <div class="acc-title">跟進紀錄 <span class="acc-count">3</span></div>
+              <div class="acc-sub">最近：昨天 15:42 · 電話聯繫客戶</div>
+            </div>
+            <div class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></div>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="acc-content">
+                <div class="timeline">
+                  <div class="tl-item">
+                    <div class="tl-dot"></div>
+                    <div class="tl-meta">昨天 15:42 · 賴建宇</div>
+                    <div class="tl-body">電話聯繫客戶，確認玄關櫃材質改用系統板</div>
+                    <div class="tl-note">客戶希望週五前回覆報價調整</div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot"></div>
+                    <div class="tl-meta">9/24 10:18 · 賴建宇</div>
+                    <div class="tl-body">寄出初版報價 PDF</div>
+                  </div>
+                </div>
+                <div class="acc-footer">
+                  <button class="link-btn" type="button" id="c-fs-follow">查看全部 →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Accordion: 審批 -->
+        <div class="acc" id="acc-appr">
+          <button class="acc-hdr" type="button" data-acc="acc-appr">
+            <div class="acc-ic appr">✅</div>
+            <div class="acc-meta">
+              <div class="acc-title">審批流程</div>
+              <div class="acc-sub">草稿 · 2 關待審（王經理 → 財務）</div>
+            </div>
+            <div class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg></div>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="acc-content">
+                <div class="appr-step">
+                  <div class="appr-avatar">賴</div>
+                  <div class="appr-body">
+                    <div class="appr-name">賴建宇</div>
+                    <div class="appr-role">業務 · 發起人</div>
+                    <div class="appr-status wait">草稿 · 尚未送出</div>
+                  </div>
+                </div>
+                <div class="appr-step">
+                  <div class="appr-avatar pending">王</div>
+                  <div class="appr-body">
+                    <div class="appr-name">王經理</div>
+                    <div class="appr-role">第 1 關</div>
+                    <div class="appr-status todo">等待中</div>
+                  </div>
+                </div>
+                <div class="acc-footer">
+                  <button class="link-btn" type="button" id="c-fs-appr">查看全部 →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="workflow-bar">
+          <div class="lbl">工作流動作</div>
+          <div class="wf-btns">
+            <button class="wf-btn primary">送出審批</button>
+            <button class="wf-btn ghost">編輯</button>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>基本資訊</h3>
+          <div class="row"><span class="k">單號</span><span class="v">SAL-QTN-2026-00296</span></div>
+          <div class="row"><span class="k">狀態</span><span class="v"><span class="pill draft">草稿</span></span></div>
+          <div class="row"><span class="k">客戶</span><span class="v">傑米室內設計</span></div>
+          <div class="row"><span class="k">金額</span><span class="v">NT$ 186,000</span></div>
+          <div class="row"><span class="k">業務負責人</span><span class="v">賴建宇</span></div>
+          <div class="row"><span class="k">建立日期</span><span class="v">2026-09-22</span></div>
+        </div>
+      </div>
+
+      <!-- Fullscreen for 查看全部 -->
+      <div class="fs-overlay" id="c-fs">
+        <div class="fs-hdr">
+          <button class="back-btn" id="c-fs-back" type="button" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <h2 id="c-fs-title">跟進紀錄</h2>
+        </div>
+        <div class="fs-body" id="c-fs-body"></div>
+      </div>
+    </div>
+  </div>
+  <p class="foot-note">點卡片標題展開／收合；點「查看全部」滑入全屏。概要內即可瞥見右側資訊。</p>
+</section>
+
+<script>
+(function () {
+  /* ---- A: bottom sheets ---- */
+  const overlay = document.getElementById('a-overlay');
+  const sheetFollow = document.getElementById('a-sheet-follow');
+  const sheetAppr = document.getElementById('a-sheet-appr');
+
+  function closeA() {
+    overlay.classList.remove('open');
+    sheetFollow.classList.remove('open');
+    sheetAppr.classList.remove('open');
+  }
+  function openA(sheet) {
+    overlay.classList.add('open');
+    sheetFollow.classList.remove('open');
+    sheetAppr.classList.remove('open');
+    sheet.classList.add('open');
+  }
+  document.getElementById('a-open-follow').addEventListener('click', () => openA(sheetFollow));
+  document.getElementById('a-open-appr').addEventListener('click', () => openA(sheetAppr));
+  overlay.addEventListener('click', closeA);
+  document.querySelectorAll('[data-close="a"]').forEach(btn => btn.addEventListener('click', closeA));
+
+  /* A tabs (cosmetic only) */
+  document.querySelectorAll('.tabs-row[data-demo="a"] .tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tab.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  /* ---- B: tabs switch panels ---- */
+  const bTabs = document.getElementById('b-tabs');
+  bTabs.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const key = tab.getAttribute('data-b');
+      bTabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('#b-scroll .b-panel').forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-panel') === key);
+      });
+      document.getElementById('b-scroll').scrollTop = 0;
+    });
+  });
+
+  /* ---- C: accordion ---- */
+  document.querySelectorAll('.acc-hdr').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const id = hdr.getAttribute('data-acc');
+      document.getElementById(id).classList.toggle('open');
+    });
+  });
+
+  const followFull = `
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-dot"></div>
+        <div class="tl-meta">昨天 15:42 · 賴建宇</div>
+        <div class="tl-body">電話聯繫客戶，確認玄關櫃材質改用系統板</div>
+        <div class="tl-note">客戶希望週五前回覆報價調整</div></div>
+      <div class="tl-item"><div class="tl-dot"></div>
+        <div class="tl-meta">9/24 10:18 · 賴建宇</div>
+        <div class="tl-body">寄出初版報價 PDF</div></div>
+      <div class="tl-item"><div class="tl-dot muted"></div>
+        <div class="tl-meta">9/22 14:05 · 系統</div>
+        <div class="tl-body">建立報價單 SAL-QTN-2026-00296</div></div>
+    </div>
+    <button class="wf-btn primary" style="width:100%;margin-top:16px;" type="button">＋ 新增跟進</button>`;
+
+  const apprFull = `
+    <div class="appr-step"><div class="appr-avatar">賴</div><div class="appr-body">
+      <div class="appr-name">賴建宇</div><div class="appr-role">業務 · 發起人</div>
+      <div class="appr-status wait">草稿 · 尚未送出</div></div></div>
+    <div class="appr-step"><div class="appr-avatar pending">王</div><div class="appr-body">
+      <div class="appr-name">王經理</div><div class="appr-role">業務主管 · 第 1 關</div>
+      <div class="appr-status todo">等待中</div></div></div>
+    <div class="appr-step"><div class="appr-avatar pending">財</div><div class="appr-body">
+      <div class="appr-name">財務審核</div><div class="appr-role">財務 · 第 2 關</div>
+      <div class="appr-status todo">等待中</div></div></div>`;
+
+  const fs = document.getElementById('c-fs');
+  const fsTitle = document.getElementById('c-fs-title');
+  const fsBody = document.getElementById('c-fs-body');
+  document.getElementById('c-fs-follow').addEventListener('click', (e) => {
+    e.stopPropagation();
+    fsTitle.textContent = '跟進紀錄';
+    fsBody.innerHTML = followFull;
+    fs.classList.add('open');
+  });
+  document.getElementById('c-fs-appr').addEventListener('click', (e) => {
+    e.stopPropagation();
+    fsTitle.textContent = '審批流程';
+    fsBody.innerHTML = apprFull;
+    fs.classList.add('open');
+  });
+  document.getElementById('c-fs-back').addEventListener('click', () => fs.classList.remove('open'));
+
+  /* Open first accordion by default for discoverability */
+  document.getElementById('acc-follow').classList.add('open');
+})();
+</script>
+</body>
+</html>
